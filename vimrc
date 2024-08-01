@@ -42,3 +42,30 @@ set hlsearch
 set incsearch
 
 inoremap jj <esc>
+
+set tags+=~/.vim/cpp_tags
+set tags+=~/.vim/python_tags
+set tags+=./tags
+set tags+=./../tags
+set tags+=./*/tags
+set tags+=./../*/tags
+set tags+=./../../tags
+set tags+=./ptags
+set tags+=./../ptags
+set tags+=./*/ptags
+set tags+=./../*/ptags
+set tags+=./../../ptags
+
+map <C-g> :!ctags -R --sort=yes --languages=c++ --c++-kinds=+p --fields+ias --extra=+q -I_GLIBCXX_NOEXCEPT --exclude=*/build/* . && ctags -f ptags -R --languages=python --python-kinds=-i --exclude=*/build/* --fields=+ias --extra=+q . <CR>
+map <C-f> <C-]>
+map <C-b> <C-t>
+
+map <C-h> :tabprev <CR>
+map <C-l> :tabnext <CR>
+map <C-j> :tabnew <CR>
+" map <C-k> :tabclose <CR>
+inoremap <C-A-j> <C-w> <C-j>
+inoremap <C-A-k> <C-w> <C-k>
+inoremap <C-A-h> <C-w> <C-h>
+inoremap <C-A-l> <C-l> <C-l>
+

@@ -43,7 +43,7 @@ esac
 # uncomment for a colored prompt, if the terminal has the capability; turned
 # off by default to not distract the user: the focus in a terminal window
 # should be on the output of commands, not on the prompt
-#force_color_prompt=yes
+force_color_prompt=yes
 
 if [ -n "$force_color_prompt" ]; then
     if [ -x /usr/bin/tput ] && tput setaf 1 >&/dev/null; then
@@ -56,52 +56,85 @@ if [ -n "$force_color_prompt" ]; then
     fi
 fi
 
-#OS=cat /etc/os-release | grep ^NAME | tr -d 'NAME="'
-OS=$(cat /etc/os-release | grep ^NAME | tr -d 'NAME="')
-VERSION=$(cat /etc/os-release | grep ^VERSION= | tr -d 'VERSION="')
-OS=${OS// /-}
-VERSION=${VERSION// /-}
-color_prompt=yes
-if [ "$color_prompt" = yes ]; then
-    PS1='\[\033[00;01;32m\]${debian_chroot:+($debian_chroot)}\[\033[00;01;32m\]\u\[\033[0;1m\]@\[\033[00;01;31m\]$OS-$VERSION\[\033[00;01m\]:\[\033[00;34m\]\w\[\033[00;01m\]\$ \[\033[00m\]'
+#OS=$(cat /etc/os-release | grep ^NAME | tr -d 'NAME="')
+#VERSION=$(cat /etc/os-release | grep ^VERSION= | tr -d 'VERSION="')
+#OS=${OS// /-}
+#VERSION=${VERSION// /-}
+
+if [ -f /etc/os-release ]; then
+    . /etc/os-release
+    OS=${PRETTY_NAME// /-}
 else
-    PS1='${debian_chroot:+($debian_chroot)}\u@\h:\w\$ '
+    OS = uname -s
+fi
+
+color_prompt=yes
+if docker ps &> /dev/null; then
+    if [ "$color_prompt" = yes ]; then
+        PS1='\[\033[00;01;32m\]${debian_chroot:+($debian_chroot)}\[\033[00;01;32m\]\u\[\033[0;1m\]:\[\033[00;01;31m\]$OS\[\033[00;01m\]:\[\033[00;34m\]\w\[\033[00;01m\]\$\[\033[00m\] '
+    else
+        PS1='\[\033[00;01;32m\]${debian_chroot:+($debian_chroot)}\[\033[00;01;32m\]\u\[\033[0;1m\]:\[\033[00;01;31m\]$OS\[\033[00;01m\]:\[\033[00;34m\]\w\[\033[00;01m\]\$\[\033[00m\] '
+    fi
+else
+    if [ "$color_prompt" = yes ]; then
+        PS1='\[\033[00;01;32m\]${debian_chroot:+($debian_chroot)}\[\033[00;01;32m\]DOCKER\[\033[0;1m\]:\[\033[00;01;31m\]$OS\[\033[00;01m\]:\[\033[00;34m\]\w\[\033[00;01m\]\$\[\033[00m\] '
+    else
+        PS1='\[\033[00;01;32m\]${debian_chroot:+($debian_chroot)}\[\033[00;01;32m\]DOCKER\[\033[0;1m\]:\[\033[00;01;31m\]$OS\[\033[00;01m\]:\[\033[00;34m\]\w\[\033[00;01m\]\$\[\033[00m\] '
+    fi
 fi
 unset color_prompt force_color_prompt
 
 # If this is an xterm set the title to user@host:dir
-case "$TERM" in
-xterm*|rxvt*)
-    PS1="\[\e]0;${debian_chroot:+($debian_chroot)}\u@\h: \w\a\]$PS1"
-    ;;
-*)
-    ;;
-esac
+# case "$TERM" in
+# xterm*|rxvt*)
+#     PS1="\[\e]0;${debian_chroot:+($debian_chroot)}\u@\h: \w\a\]$PS1"
+#     ;;
+# *)
+#     ;;
+# esac
 
-alias cd='HOME=~/GPDM cd'
-alias gk='gitk --all'
 
 # enable color support of ls and also add handy aliases
 if [ -x /usr/bin/dircolors ]; then
     test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
     alias ls='ls --color=auto'
-    #alias dir='dir --color=auto'
-    #alias vdir='vdir --color=auto'
-
     alias grep='grep --color=auto'
     alias fgrep='fgrep --color=auto'
     alias egrep='egrep --color=auto'
 fi
 
 # colored GCC warnings and errors
-#export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'
+export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'
+set -o monitor
 
 # some more ls aliases
 alias ll='ls -lFh'
-alias la='ls -A'
+alias la='ls -Al'
 alias l='ls -CF'
-alias gk="gitk --all"
 alias reset="reset && printf '\e[3J'"
+alias bdf="df -k"
+alias gk="gitk --all"
+alias gs="git status"
+alias gcm="git commit -m"
+alias gch="git checkout"
+alias gl="git log"
+
+export PATH=~/.local/bin:$PATH
+
+alias fp='fprime-util'
+alias fpp='yes | fprime-util purge'
+alias fpg='fprime-util generate'
+alias fpb='fprime-util build'
+alias fpr='yes | fprime-util purge && fprime-util generate && fprime-util build'
+ 
+alias cfgm2='source ~/fprime/fprime-v1.3.1-venv/bin/activate && mkdir -p /home/parallels/GPDM/foxglove-software/build_fgm2 && cd /home/parallels/GPDM/foxglove-software/build_fgm2 && cmake -DARDUINO_FREQ=7372800 -DCMAKE_TOOLCHAIN_FILE=../cmake/toolchain/Arduino.cmake -DARDUINO_SDK_PATH=/etc/arduino-1.8.19/ -DARDUINO_BOARD_NAME=ATmega128 -DARDUINO_PACKAGE_DIR=../ATmega/vendor/MegaCore-2.0.2/ -DARDUINO_SRC_DIR=../ATmega/vendor/MegaCore-2.0.2/cores/MegaCore/ -DARDUINO_VARIANT_SRC_DIR=../ATmega/vendor/MegaCore-2.0.2/variants/64-pin-avr/ ../foxglove_model2/FoxgloveModel2FlightFw/ && make FoxgloveModel2FlightFw_hex'
+
+alias cfgm1='source ~/fprime/fprime-v1.3.1-venv/bin/activate && mkdir -p /home/parallels/GPDM/foxglove-software/build_fgm1 && cd /home/parallels/GPDM/foxglove-software/build_fgm1 && cmake -DARDUINO_FREQ=7372800 -DCMAKE_TOOLCHAIN_FILE=../cmake/toolchain/Arduino.cmake -DARDUINO_SDK_PATH=/etc/arduino-1.8.19/ -DARDUINO_BOARD_NAME=ATmega128 -DARDUINO_PACKAGE_DIR=../ATmega/vendor/MegaCore-2.0.2/ -DARDUINO_SRC_DIR=../ATmega/vendor/MegaCore-2.0.2/cores/MegaCore/ -DARDUINO_VARIANT_SRC_DIR=../ATmega/vendor/MegaCore-2.0.2/variants/64-pin-avr/ ../foxglove_model1/FoxgloveModel1FlightFw/ && make FoxgloveModel1FlightFw_hex'
+# Add an "alert" alias for long running commands.  Use like so:
+#   sleep 10; alert
+alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
+
+export fgm1="fgm1-user@143.215.191.21"
 
 export PATH=~/.local/bin:$PATH
 

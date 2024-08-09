@@ -1,4 +1,4 @@
-sudo apt-get install tmux vim xclip build-essential gitk git
+sudo apt-get install -y tmux vim xclip build-essential gitk git
 cat bashrc > ~/.bashrc
 cat vimrc > ~/.vimrc
 sudo touch /etc/vim/vimrc.local

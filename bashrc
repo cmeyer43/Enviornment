@@ -84,16 +84,6 @@ else
 fi
 unset color_prompt force_color_prompt
 
-# If this is an xterm set the title to user@host:dir
-# case "$TERM" in
-# xterm*|rxvt*)
-#     PS1="\[\e]0;${debian_chroot:+($debian_chroot)}\u@\h: \w\a\]$PS1"
-#     ;;
-# *)
-#     ;;
-# esac
-
-
 # enable color support of ls and also add handy aliases
 if [ -x /usr/bin/dircolors ]; then
     test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
@@ -114,12 +104,12 @@ alias l='ls -CF'
 alias reset="reset && printf '\e[3J'"
 alias bdf="df -k"
 alias gk="gitk --all"
+alias gb="git btranch -a"
 alias gs="git status"
 alias gcm="git commit -m"
 alias gch="git checkout"
 alias gl="git log"
-
-export PATH=~/.local/bin:$PATH
+alias h="fc -l"
 
 alias fp='fprime-util'
 alias fpp='yes | fprime-util purge'
@@ -127,9 +117,9 @@ alias fpg='fprime-util generate'
 alias fpb='fprime-util build'
 alias fpr='yes | fprime-util purge && fprime-util generate && fprime-util build'
  
-alias cfgm2='source ~/fprime/fprime-v1.3.1-venv/bin/activate && mkdir -p /home/parallels/GPDM/foxglove-software/build_fgm2 && cd /home/parallels/GPDM/foxglove-software/build_fgm2 && cmake -DARDUINO_FREQ=7372800 -DCMAKE_TOOLCHAIN_FILE=../cmake/toolchain/Arduino.cmake -DARDUINO_SDK_PATH=/etc/arduino-1.8.19/ -DARDUINO_BOARD_NAME=ATmega128 -DARDUINO_PACKAGE_DIR=../ATmega/vendor/MegaCore-2.0.2/ -DARDUINO_SRC_DIR=../ATmega/vendor/MegaCore-2.0.2/cores/MegaCore/ -DARDUINO_VARIANT_SRC_DIR=../ATmega/vendor/MegaCore-2.0.2/variants/64-pin-avr/ ../foxglove_model2/FoxgloveModel2FlightFw/ && make FoxgloveModel2FlightFw_hex'
-
-alias cfgm1='source ~/fprime/fprime-v1.3.1-venv/bin/activate && mkdir -p /home/parallels/GPDM/foxglove-software/build_fgm1 && cd /home/parallels/GPDM/foxglove-software/build_fgm1 && cmake -DARDUINO_FREQ=7372800 -DCMAKE_TOOLCHAIN_FILE=../cmake/toolchain/Arduino.cmake -DARDUINO_SDK_PATH=/etc/arduino-1.8.19/ -DARDUINO_BOARD_NAME=ATmega128 -DARDUINO_PACKAGE_DIR=../ATmega/vendor/MegaCore-2.0.2/ -DARDUINO_SRC_DIR=../ATmega/vendor/MegaCore-2.0.2/cores/MegaCore/ -DARDUINO_VARIANT_SRC_DIR=../ATmega/vendor/MegaCore-2.0.2/variants/64-pin-avr/ ../foxglove_model1/FoxgloveModel1FlightFw/ && make FoxgloveModel1FlightFw_hex'
+export PATH=~/.local/bin:$PATH
+export EDITOR="vim"
+export VISUAL="vim"
 # Add an "alert" alias for long running commands.  Use like so:
 #   sleep 10; alert
 alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'

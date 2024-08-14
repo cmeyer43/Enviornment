@@ -1,4 +1,4 @@
-sudo apt-get install tmux vim xclip build-essential gitk git docker.io
+sudo apt-get install -y tmux vim xclip build-essential gitk git docker.io
 cp ~/.bashrc ~/.bashrc.old
 cat bashrc > ~/.bashrc
 cp ~/.vimrc ~/.vimrc.old

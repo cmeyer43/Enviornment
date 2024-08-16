@@ -1,9 +1,11 @@
+touch ~/.vimrc
 cp ~/.vimrc ~/.vimrc.old
 cp ~/.tmux.conf ~/.tmux.conf.old
 name="$(uname -s)"
 case "${name}" in
     Linux*)
         sudo apt-get install -y tmux vim xclip build-essential gitk git docker.io
+        touch ~/.bashrc
         cp ~/.bashrc ~/.bashrc.old
         cat bashrc > ~/.bashrc
         cat vimrc > ~/.vimrc
@@ -24,6 +26,7 @@ chmod 777 /var/run/docker.sock
         echo "Linux";;
     Darwin*)
         brew install tmux vim xclip git gitx docker -q
+        touch ~/.zshrc
         cp ~/.zshrc ~/.zshrc.old
         cat zshrc > ~/.zshrc
         cat tmuxApple.conf >~/.tmux.conf

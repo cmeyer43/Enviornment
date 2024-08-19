@@ -1,4 +1,5 @@
 touch ~/.vimrc
+touch ~/.tmux.conf
 cp ~/.vimrc ~/.vimrc.old
 cp ~/.tmux.conf ~/.tmux.conf.old
 name="$(uname -s)"
@@ -23,15 +24,18 @@ case "${name}" in
         newgrp
         newgrp docker
 chmod 777 /var/run/docker.sock
-        echo "Linux";;
+        echo "Linux Setup";;
     Darwin*)
         brew install tmux vim xclip git gitx docker ncdu -q
+        /bin/bash "$curl https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+        (echo: echo 'eval "$/opt/homebrew/bin/brew shellenv)"') >> ~/.zprofile
+        eval "($/opt/homebrew/bin/brew shellenv)"
         touch ~/.zshrc
         cp ~/.zshrc ~/.zshrc.old
         cat zshrc > ~/.zshrc
         cat tmuxApple.conf >~/.tmux.conf
         source ~/.zshrc
-        echo "mac";;
+        echo "Mac Setup";;
 esac
 cat vimrc > ~/.vimrc
 tmux source ~/.tmux.conf

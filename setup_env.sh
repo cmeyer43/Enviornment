@@ -26,10 +26,11 @@ case "${name}" in
 chmod 777 /var/run/docker.sock
         echo "Linux Setup";;
     Darwin*)
-        brew install tmux vim xclip git gitx docker ncdu -q
+        xcode-select --install
         /bin/bash "$curl https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
         (echo: echo 'eval "$/opt/homebrew/bin/brew shellenv)"') >> ~/.zprofile
         eval "($/opt/homebrew/bin/brew shellenv)"
+        brew install tmux vim xclip git gitx docker ncdu -q
         touch ~/.zshrc
         cp ~/.zshrc ~/.zshrc.old
         cat zshrc > ~/.zshrc

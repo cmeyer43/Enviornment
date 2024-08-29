@@ -29,7 +29,7 @@ compinit
 alias pace="ssh cmeyer43@coc-ice.pace.gatech.edu"
 alias ECE4130="ssh -Y cmeyer43@ece-linlabsrv01.ece.gatech.edu"
 
-alias ls='ls --color=auto'
+alias ls='ls -G'
 alias ll="ls -lFh"
 alias la="ls -a"
 alias l="ls -CF"
@@ -51,10 +51,6 @@ setopt PROMPT_SUBST
 PROMPT='%B%F{green}%n%F{white}@%F{red}$(sw_vers -productName)-$(sw_vers -productVersion)%f%F{white}:%f%F{blue}%~%f\$%b '
 
 # enable color support of ls and also add handy aliases
-alias ls='ls -G'
-alias grep='grep -G'
-alias fgrep='fgrep -G'
-alias egrep='egrep -G'
 
 # colored GCC warnings and errors
 export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'

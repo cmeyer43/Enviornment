@@ -56,7 +56,7 @@ set tags+=./*/ptags
 set tags+=./../*/ptags
 set tags+=./../../ptags
 
-map <C-g> :!ctags -R --sort=yes --languages=c++ --c++-kinds=+p --fields+ias --extra=+q -I_GLIBCXX_NOEXCEPT --exclude=*/build/* . && ctags -f ptags -R --languages=python --python-kinds=-i --exclude=*/build/* --fields=+ias --extra=+q . <CR>
+map <C-g> :!ctags -R --sort=yes --languages=c++ --c++-kinds=+p --fields=+ias --extra=+q -I_GLIBCXX_NOEXCEPT --exclude=*/build/* . && ctags -f ptags -R --languages=python --python-kinds=-i --exclude=*/build/* --fields=+ias --extra=+q . <CR>
 map <C-f> <C-]>
 map <C-b> <C-t>
 

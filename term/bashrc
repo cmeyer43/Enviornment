@@ -35,6 +35,9 @@ if [ -z "${debian_chroot:-}" ] && [ -r /etc/debian_chroot ]; then
     debian_chroot=$(cat /etc/debian_chroot)
 fi
 
+# Make up arrow auto complete use the text currently typed in search for past commands.
+# tty=$(tty); [[ $tty != "not a tty" ]] && bind '"\e[A":history-search-backward' && bind '"\e[B":history-search-forward'
+
 # set a fancy prompt (non-color, unless we know we "want" color)
 case "$TERM" in
     xterm-color|*-256color) color_prompt=yes;;
@@ -154,3 +157,8 @@ if ! shopt -oq posix; then
     . /etc/bash_completion
   fi
 fi
+
+# Avoid duplicates
+HISTCONTROL=ignoredups:erasdups
+# When the shell exits, append to the history file instead of overwriting it.
+shopt -s histappend

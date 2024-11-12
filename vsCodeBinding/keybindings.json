@@ -1,0 +1,36 @@
+// Place your key bindings in this file to override the defaults
+[
+    {
+        "key": "ctrl+j",
+        "command": "workbench.action.files.newUntitledFile",
+        "when": "vim.mode != 'Insert'"
+    },
+    {
+        "key": "cmd+n",
+        "command": "workbench.action.files.newUntitledFile"
+    },
+    {
+        "key": "alt+h",
+        "command": "workbench.action.navigateLeft"
+    },
+    {
+        "key": "alt+l",
+        "command": "workbench.action.navigateRight"
+    },
+    {
+        "key": "alt+k",
+        "command": "workbench.action.navigateUp"
+    },
+    {
+        "key": "alt+j",
+        "command": "workbench.action.navigateDown"
+    },
+    {
+        "key": "ctrl+b \\",
+        "command": "workbench.action.splitEditor"
+    },
+    {
+        "key": "ctrl+b -",
+        "command": "workbench.action.splitEditorDown"
+    }
+]

@@ -66,9 +66,12 @@ fi
 
 if [ -f /etc/os-release ]; then
     . /etc/os-release
-    OS=${PRETTY_NAME// /-}
+    OS_NAME=${NAME// /-}
+    . /etc/os-release
+    VER=${ID_VERSION// /-}
+    OS="$OS_NAME-$VER"
 else
-    OS = uname -s
+    OS="$(uname -s)"
 fi
 
 color_prompt=yes
@@ -128,21 +131,8 @@ alias fpr='yes | fprime-util purge && fprime-util generate && fprime-util build'
 export PATH=~/.local/bin:$PATH
 export EDITOR="vim"
 export VISUAL="vim"
-# Add an "alert" alias for long running commands.  Use like so:
-#   sleep 10; alert
-alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
-
-export PATH=~/.local/bin:$PATH
-
-# Add an "alert" alias for long running commands.  Use like so:
-#   sleep 10; alert
-alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
 
 # Alias definitions.
-# You may want to put all your additions into a separate file like
-# ~/.bash_aliases, instead of adding them here directly.
-# See /usr/share/doc/bash-doc/examples in the bash-doc package.
-
 if [ -f ~/.bash_aliases ]; then
     . ~/.bash_aliases
 fi
@@ -157,8 +147,3 @@ if ! shopt -oq posix; then
     . /etc/bash_completion
   fi
 fi
-
-# Avoid duplicates
-HISTCONTROL=ignoredups:erasdups
-# When the shell exits, append to the history file instead of overwriting it.
-shopt -s histappend

@@ -5,7 +5,13 @@ cp ~/.tmux.conf ~/.tmux.conf.old
 name="$(uname -s)"
 case "${name}" in
     Linux*)
-        sudo apt-get install -y tmux vim xclip build-essential gitk git docker.io ncdu
+        if apt &> /dev/null; then
+            sudo apt-get install -y tmux vim xclip build-essential gitk git docker.io ncdu
+        elif dnf &> /dev/null; then
+            sudo dnf install -y tmux vim xclip gitk git ncdu dnf-plugins-core
+            sudo dnf-3 -y config-manager --add-repo https://download.docker.com/linux/fedora/docker-ce.repo
+            sudo dnf install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+        fi
         touch ~/.bashrc
         cp ~/.bashrc ~/.bashrc.old
         cat bashrc > ~/.bashrc
@@ -23,7 +29,8 @@ case "${name}" in
         sudo usermod -aG docker $USER
         newgrp
         newgrp docker
-chmod 777 /var/run/docker.sock
+        chmod 777 /var/run/docker.sock
+        sudo systemctl start docker.socket
         echo "Linux Setup";;
     Darwin*)
         xcode-select --install

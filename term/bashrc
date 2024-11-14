@@ -77,10 +77,12 @@ else
     OS="$(uname -s)"
 fi
 
+MACHINE="$(uname -m)"
+
 color_prompt=yes
 if docker ps &> /dev/null; then
     if [ "$color_prompt" = yes ]; then
-        PS1='\[\033[00;01;32m\]${debian_chroot:+($debian_chroot)}\[\033[00;01;32m\]\u\[\033[0;1m\]:\[\033[00;01;31m\]$OS\[\033[00;01m\]:\[\033[00;34m\]\w\[\033[00;01m\]\$\[\033[00m\] '
+        PS1='\[\033[00;01;32m\]${debian_chroot:+($debian_chroot)}\[\033[00;01;32m\]\u\[\033[0;1m\]-\[\033[0;36m\]$MACHINE\[\033[0;1m\]:\[\033[00;01;31m\]$OS\[\033[00;01m\]:\[\033[00;34m\]\w\[\033[00;01m\]\$\[\033[00m\] '
     else
         PS1='\[\033[00;01;32m\]${debian_chroot:+($debian_chroot)}\[\033[00;01;32m\]\u\[\033[0;1m\]:\[\033[00;01;31m\]$OS\[\033[00;01m\]:\[\033[00;34m\]\w\[\033[00;01m\]\$\[\033[00m\] '
     fi

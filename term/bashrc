@@ -67,9 +67,12 @@ fi
 if [ -f /etc/os-release ]; then
     . /etc/os-release
     OS_NAME=${NAME// /-}
-    . /etc/os-release
     VER=${ID_VERSION// /-}
-    OS="$OS_NAME-$VER"
+    if [ -z ${VER} ]; then
+        OS=$OS_NAME
+    else
+        OS="$OS_NAME-$VER"
+    fi
 else
     OS="$(uname -s)"
 fi

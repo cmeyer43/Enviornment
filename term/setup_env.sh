@@ -11,6 +11,7 @@ case "${name}" in
             sudo dnf install -y tmux vim xclip gitk git ncdu dnf-plugins-core
             sudo dnf-3 -y config-manager --add-repo https://download.docker.com/linux/fedora/docker-ce.repo
             sudo dnf install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+            sudo systemctl start docker.socket
         fi
         touch ~/.bashrc
         cp ~/.bashrc ~/.bashrc.old
@@ -32,6 +33,7 @@ case "${name}" in
         chmod 777 /var/run/docker.sock
         sudo systemctl start docker.socket
         echo "Linux Setup";;
+
     Darwin*)
         xcode-select --install
         /bin/bash "$curl https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"

@@ -11,7 +11,8 @@ case "${name}" in
         elif dnf &> /dev/null; then
             sudo dnf install -y tmux vim xclip gitk git ncdu dnf-plugins-core
             sudo dnf-3 -y config-manager --add-repo https://download.docker.com/linux/fedora/docker-ce.repo
-            sudo dnf install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+            sudo dnf install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin
+                                docker-compose-plugin
         fi
         sudo systemctl start docker.socket
         touch ~/.bashrc

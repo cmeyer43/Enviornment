@@ -67,7 +67,7 @@ fi
 if [ -f /etc/os-release ]; then
     . /etc/os-release
     OS_NAME=${NAME// /-}
-    VER=${ID_VERSION// /-}
+    VER=${VERSION_ID// /-}
     if [ -z ${VER} ]; then
         OS=$OS_NAME
     else

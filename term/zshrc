@@ -136,7 +136,7 @@ git_prompt()
     echo "${GIT_PROMPT_PREFIX}${output}${GIT_PROMPT_SUFFIX}"
 }
 setopt PROMPT_SUBST
-PROMPT='%B%F{green}%n%F{white}:%F{red}$(sw_vers -productName)-$(sw_vers -productVersion)%f%F{white}:%f%F{blue}%~%f\$%b '
+PROMPT='%B%F{green}%n%F{white}-%F{cyan}$CPUTYPE%F{white}:%F{red}$(sw_vers -productName)-$(sw_vers -productVersion)%f%F{white}:%f%F{blue}%~%f\$%b '
 # PROMPT='%B%F{green}%n%F{white}-%F{blue}%m%F{white}:%F{red}$OS%f%F{white}:%f%F{blue}%~%f\$%b '
 RPROMPT='$(git_prompt)'
 

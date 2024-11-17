@@ -8,24 +8,20 @@ case "${name}" in
         if apt list &> /dev/null; then
             sudo apt-get update
             sudo apt-get install -y tmux vim xclip build-essential gitk git docker.io ncdu
+        sudo touch /etc/vim/vimrc.local
+        sudo cat vimrc > /etc/vim/vimrc.local
         elif dnf &> /dev/null; then
             sudo dnf install -y tmux vim xclip gitk git ncdu dnf-plugins-core
             sudo dnf-3 -y config-manager --add-repo https://download.docker.com/linux/fedora/docker-ce.repo
-            sudo dnf install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin
-                                docker-compose-plugin
+            sudo dnf install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+            sudo touch /etc/vimrc
+            sudo cp vimrc /etc/vimrc
         fi
         sudo systemctl start docker.socket
         touch ~/.bashrc
         cp ~/.bashrc ~/.bashrc.old
         cat bashrc > ~/.bashrc
         cat vimrc > ~/.vimrc
-        sudo touch /etc/vim/vimrc.local
-        sudo cat vimrc > /etc/vim/vimrc.local
-        cat tmux.conf > ~/.tmux.conf
-        source ~/.bashrc
-        cat bashrc > ~/.bashrc
-        sudo touch /etc/vim/vimrc.local
-        sudo cat vimrc > /etc/vim/vimrc.local
         cat tmux.conf > ~/.tmux.conf
         source ~/.bashrc
         sudo groupadd docker

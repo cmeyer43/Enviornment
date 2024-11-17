@@ -173,8 +173,6 @@ alias fpr='yes | fprime-util purge && fprime-util generate && fprime-util build'
 #   sleep 10; alert
 alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
 
-export fgm1="fgm1-user@143.215.191.21"
-
 export PATH=~/.local/bin:$PATH
 
 # Add an "alert" alias for long running commands.  Use like so:

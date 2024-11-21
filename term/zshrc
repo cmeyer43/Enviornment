@@ -16,8 +16,6 @@ export OPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl@3
 # <<< conda initialize <<<
 
 
-test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
-
 # The following lines were added by compinstall
 
 zstyle ':completion:*' completer _complete _ignored
@@ -156,7 +154,7 @@ alias reset="reset && printf '\e[3J'"
 alias bdf="df -k"
 alias gk="gitx --all"
 alias gs="git status"
-alias gba="git branch -all"
+alias gba="git branch --all"
 alias gcm="git commit -m"
 alias gch="git checkout"
 alias gl="git log"

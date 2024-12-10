@@ -133,9 +133,37 @@ git_prompt()
 
     echo "${GIT_PROMPT_PREFIX}${output}${GIT_PROMPT_SUFFIX}"
 }
+
+if [ -f /etc/os-release ]; then
+    . /etc/os-release
+    OS_NAME=${NAME// /-}
+    VER=${VERSION_ID// /-}
+    if [ -z ${VER} ]; then
+        OS=$OS_NAME
+    else
+        OS="$OS_NAME-$VER"
+    fi
+else
+    OS="$(uname -s)"
+fi
+
+SH=""
+echo ${ZSH_VERSION}
+echo ${BASH_VERSION}
+if [ "${ZSH_VERSION}" ]; then
+    SH="zsh"
+    echo "ZSH"
+elif [ "${BASH_VERSION}" ]; then
+    SH="bash"
+    echo "bash"
+fi
+
+MACHINE="$(uname -m)"
 setopt PROMPT_SUBST
-PROMPT='%B%F{green}%n%F{white}-%F{cyan}$CPUTYPE%F{white}:%F{red}$(sw_vers -productName)-$(sw_vers -productVersion)%f%F{white}:%f%F{blue}%~%f\$%b '
-# PROMPT='%B%F{green}%n%F{white}-%F{blue}%m%F{white}:%F{red}$OS%f%F{white}:%f%F{blue}%~%f\$%b '
+
+# PROMPT='%B%F{green}%n%F{white}-%F{magenta}%m%F{white}-%F{cyan}$CPUTYPE%F{white}:%F{red}$OS%F{white}-%f%F{magenta}$SH%f%F{white}:%f%F{blue}%~%f\$%b '
+# RPROMPT='$(git_prompt)'
+PROMPT='%B%F{green}%n%F{white}-%F{cyan}$CPUTYPE%F{white}:%F{red}$(sw_vers -productName)-$(sw_vers -productVersion)%f%F{white}%F{white}-%f%F{magenta}$SH%f:%f%F{blue}%~%f\$%b '
 RPROMPT='$(git_prompt)'
 
 # PROMPT='%B%F{green}%n%F{white}-%F{blue}%m%F{white}:%F{red}$(sw_vers -productName)-$(sw_vers -productVersion)%f%F{white}:%f%F{blue}%~%f\$%b '

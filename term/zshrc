@@ -1,20 +1,9 @@
-export OPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl@3
-
-# >>> conda initialize >>>
-# !! Contents within this block are managed by 'conda init' !!
-#__conda_setup="$('/Users/coreymeyer/opt/miniconda3/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
-#if [ $? -eq 0 ]; then
-#    eval "$__conda_setup"
-#else
-#    if [ -f "/Users/coreymeyer/opt/miniconda3/etc/profile.d/conda.sh" ]; then
-#        . "/Users/coreymeyer/opt/miniconda3/etc/profile.d/conda.sh"
-#    else
-#        export PATH="/Users/coreymeyer/opt/miniconda3/bin:$PATH"
-#    fi
-#fi
-#unset __conda_setup
-# <<< conda initialize <<<
-
+# Make zsh autocomplete with up arrow
+# autoload -Uz history-search-end
+# zle -N history-beginning-search-backward-end history-search-end
+# zle -N history-beginning-search-forward-end history-search-end
+# bindkey "$terminfo[kcuu1]" history-beginning-search-backward-end
+# bindkey "$terminfo[kcud1]" history-beginning-search-forward-end
 
 # The following lines were added by compinstall
 
@@ -23,9 +12,6 @@ zstyle :compinstall filename '/Users/coreymeyer/.zshrc'
 
 autoload -Uz compinit
 compinit
-
-alias pace="ssh cmeyer43@coc-ice.pace.gatech.edu"
-alias ECE4130="ssh -Y cmeyer43@ece-linlabsrv01.ece.gatech.edu"
 
 alias ls='ls -G'
 alias ll="ls -lFh"
@@ -37,136 +23,133 @@ export GREP_COLOR='1;35;40'
 
 export PATH=$PATH:/usr/local/go/bin
 
-# End of lines added by compinstall
+# PS1 Setup
 
-# The next line updates PATH for the Google Cloud SDK.
-if [ -f '/Users/coreymeyer/Downloads/google-cloud-sdk/path.zsh.inc' ]; then . '/Users/coreymeyer/Downloads/google-cloud-sdk/path.zsh.inc'; fi
+    ### Git [±master ▾●]
+    GIT_PROMPT_PREFIX="[%F{green}±%F{white}"
+    GIT_PROMPT_SUFFIX="%F{white}]"
+    GIT_PROMPT_CLEAN="%F{green}✓%F{white}"
+    GIT_PROMPT_AHEAD="%f{cyan}▴%f{whtie}"
+    GIT_PROMPT_BEHIND="%f{magenta}▾%F{white}"
+    GIT_PROMPT_STAGED="%F{green}●%F{white}"
+    GIT_PROMPT_UNSTAGED="%F{yellow}●%F{white}"
+    GIT_PROMPT_UNTRACKED="%F{red}●%F{white}"
+    GIT_PROMPT_STASHED="(%F{blue}✹%F{white})"
 
-# The next line enables shell command completion for gcloud.
-if [ -f '/Users/coreymeyer/Downloads/google-cloud-sdk/completion.zsh.inc' ]; then . '/Users/coreymeyer/Downloads/google-cloud-sdk/completion.zsh.inc'; fi
+    git_info ()
+    {
+        local ref
+        ref=$(command git symbolic-ref HEAD 2> /dev/null) || \
+        ref=$(command git rev-parse --short HEAD 2> /dev/null) || return
+        echo "${ref#refs/heads/}"
+    }
 
-### Git [±master ▾●]
-GIT_PROMPT_PREFIX="[%F{green}±%F{white}"
-GIT_PROMPT_SUFFIX="%F{white}]"
-GIT_PROMPT_CLEAN="%F{green}✓%F{white}"
-GIT_PROMPT_AHEAD="%f{cyan}▴%f{whtie}"
-GIT_PROMPT_BEHIND="%f{magenta}▾%F{white}"
-GIT_PROMPT_STAGED="%F{green}●%F{white}"
-GIT_PROMPT_UNSTAGED="%F{yellow}●%F{white}"
-GIT_PROMPT_UNTRACKED="%F{red}●%F{white}"
-GIT_PROMPT_STASHED="(%F{blue}✹%F{white})"
+    git_status()
+    {
+        local result gitstatus
+        gitstatus="$(command git status --porcelain -b 2>/dev/null)"
 
-git_info ()
-{
-    local ref
-    ref=$(command git symbolic-ref HEAD 2> /dev/null) || \
-    ref=$(command git rev-parse --short HEAD 2> /dev/null) || return
-    echo "${ref#refs/heads/}"
-}
-
-git_status()
-{
-    local result gitstatus
-    gitstatus="$(command git status --porcelain -b 2>/dev/null)"
-
-    # check status of files
-    local gitfiles="$(tail -n +2 <<< "$gitstatus")"
-    if [[ -n "$gitfiles" ]]; then
-        if [[ "$gitfiles" =~ $'(^|\n)[AMRD]. ' ]]; then
-            result+="$GIT_PROMPT_STAGED"
+        # check status of files
+        local gitfiles="$(tail -n +2 <<< "$gitstatus")"
+        if [[ -n "$gitfiles" ]]; then
+            if [[ "$gitfiles" =~ $'(^|\n)[AMRD]. ' ]]; then
+                result+="$GIT_PROMPT_STAGED"
+            fi
+            if [[ "$gitfiles" =~ $'(^|\n).[MTD] ' ]]; then
+                result+="$GIT_PROMPT_UNSTAGED"
+            fi
+            if [[ "$gitfiles" =~ $'(^|\n)\\?\\? ' ]]; then
+                result+="$GIT_PROMPT_UNTRACKED"
+            fi
+            if [[ "$gitfiles" =~ $'(^|\n)UU ' ]]; then
+                result+="$GIT_PROMPT_UNMERGED"
+            fi
+        else
+            result+="$GIT_PROMPT_CLEAN"
         fi
-        if [[ "$gitfiles" =~ $'(^|\n).[MTD] ' ]]; then
-            result+="$GIT_PROMPT_UNSTAGED"
+
+        # check status of local repository
+        local gitbranch="$(head -n 1 <<< "$gitstatus")"
+        if [[ "$gitbranch" =~ '^## .*ahead' ]]; then
+            result+="$GIT_PROMPT_AHEAD"
         fi
-        if [[ "$gitfiles" =~ $'(^|\n)\\?\\? ' ]]; then
-            result+="$GIT_PROMPT_UNTRACKED"
+        if [[ "$gitbranch" =~ '^## .*behind' ]]; then
+            result+="$GIT_PROMPT_BEHIND"
         fi
-        if [[ "$gitfiles" =~ $'(^|\n)UU ' ]]; then
-            result+="$GIT_PROMPT_UNMERGED"
+        if [[ "$gitbranch" =~ '^## .*diverged' ]]; then
+            result+="$GIT_PROMPT_DIVERGED"
+        fi
+
+        # check if there are stashed changes
+        if command git rev-parse --verify refs/stash &> /dev/null; then
+            result+="$GIT_PROMPT_STASHED"
+        fi
+
+        echo $result
+    }
+
+
+    git_prompt()
+    {
+        # ignore non git folders and hidden repos (adapted from lib/git.zsh)
+        if ! command git rev-parse --git-dir &> /dev/null \
+            || [[ "$(command git config --get oh-my-zsh.hide-info 2>/dev/null)" == 1 ]]; then
+            return
+        fi
+        # check git information
+        local gitinfo=$(git_info)
+        if [[ -z "$gitinfo" ]]; then
+            return
+        fi
+
+        # quote % in git information
+        local output="${gitinfo:gs/%/%%}"
+
+        # check git status
+        local gitstatus=$(git_status)
+        if [[ -n "$gitstatus" ]]; then
+            output+=" $gitstatus"
+        fi
+
+        echo "${GIT_PROMPT_PREFIX}${output}${GIT_PROMPT_SUFFIX}"
+    }
+
+    if [ -f /etc/os-release ]; then
+        . /etc/os-release
+        OS_NAME=${NAME// /-}
+        VER=${VERSION_ID// /-}
+        if [ -z ${VER} ]; then
+            OS=$OS_NAME
+        else
+            OS="$OS_NAME-$VER"
         fi
     else
-        result+="$GIT_PROMPT_CLEAN"
+        OS="$(uname -s)"
     fi
 
-    # check status of local repository
-    local gitbranch="$(head -n 1 <<< "$gitstatus")"
-    if [[ "$gitbranch" =~ '^## .*ahead' ]]; then
-        result+="$GIT_PROMPT_AHEAD"
-    fi
-    if [[ "$gitbranch" =~ '^## .*behind' ]]; then
-        result+="$GIT_PROMPT_BEHIND"
-    fi
-    if [[ "$gitbranch" =~ '^## .*diverged' ]]; then
-        result+="$GIT_PROMPT_DIVERGED"
-    fi
-
-    # check if there are stashed changes
-    if command git rev-parse --verify refs/stash &> /dev/null; then
-        result+="$GIT_PROMPT_STASHED"
+    SH=""
+    echo ${ZSH_VERSION}
+    echo ${BASH_VERSION}
+    if [ "${ZSH_VERSION}" ]; then
+        SH="zsh"
+        echo "ZSH"
+    elif [ "${BASH_VERSION}" ]; then
+        SH="bash"
+        echo "bash"
     fi
 
-    echo $result
-}
+    MACHINE="$(uname -m)"
+    setopt PROMPT_SUBST
 
-
-git_prompt()
-{
-    # ignore non git folders and hidden repos (adapted from lib/git.zsh)
-    if ! command git rev-parse --git-dir &> /dev/null \
-        || [[ "$(command git config --get oh-my-zsh.hide-info 2>/dev/null)" == 1 ]]; then
-        return
-    fi
-    # check git information
-    local gitinfo=$(git_info)
-    if [[ -z "$gitinfo" ]]; then
-        return
-    fi
-
-    # quote % in git information
-    local output="${gitinfo:gs/%/%%}"
-
-    # check git status
-    local gitstatus=$(git_status)
-    if [[ -n "$gitstatus" ]]; then
-        output+=" $gitstatus"
-    fi
-
-    echo "${GIT_PROMPT_PREFIX}${output}${GIT_PROMPT_SUFFIX}"
-}
-
-if [ -f /etc/os-release ]; then
-    . /etc/os-release
-    OS_NAME=${NAME// /-}
-    VER=${VERSION_ID// /-}
-    if [ -z ${VER} ]; then
-        OS=$OS_NAME
-    else
-        OS="$OS_NAME-$VER"
-    fi
-else
-    OS="$(uname -s)"
-fi
-
-SH=""
-echo ${ZSH_VERSION}
-echo ${BASH_VERSION}
-if [ "${ZSH_VERSION}" ]; then
-    SH="zsh"
-    echo "ZSH"
-elif [ "${BASH_VERSION}" ]; then
-    SH="bash"
-    echo "bash"
-fi
-
-MACHINE="$(uname -m)"
-setopt PROMPT_SUBST
-
-# PROMPT='%B%F{green}%n%F{white}-%F{magenta}%m%F{white}-%F{cyan}$CPUTYPE%F{white}:%F{red}$OS%F{white}-%f%F{magenta}$SH%f%F{white}:%f%F{blue}%~%f\$%b '
-# RPROMPT='$(git_prompt)'
-PROMPT='%B%F{green}%n%F{white}-%F{cyan}$CPUTYPE%F{white}:%F{red}$(sw_vers -productName)-$(sw_vers -productVersion)%f%F{white}%F{white}-%f%F{magenta}$SH%f:%f%F{blue}%~%f\$%b '
-RPROMPT='$(git_prompt)'
-
-# PROMPT='%B%F{green}%n%F{white}-%F{blue}%m%F{white}:%F{red}$(sw_vers -productName)-$(sw_vers -productVersion)%f%F{white}:%f%F{blue}%~%f\$%b '
+    case "$(uname)" in
+        "Darwin")
+            PROMPT='%B%F{green}%n%F{white}-%F{cyan}$CPUTYPE%F{white}:%F{red}$(sw_vers -productName)-$(sw_vers -productVersion)%f%F{white}%F{white}-%f%F{magenta}$SH%f:%f%F{blue}%~%f\$%b '
+            ;;
+        "Linux")
+            PROMPT='%B%F{green}%n%F{white}-%F{magenta}%m%F{white}-%F{cyan}$CPUTYPE%F{white}:%F{red}$OS%F{white}-%f%F{magenta}$SH%f%F{white}:%f%F{blue}%~%f\$%b '
+            ;;
+    esac
+    RPROMPT='$(git_prompt)'
 
 # enable color support of ls and also add handy aliases
 

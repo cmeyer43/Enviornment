@@ -147,8 +147,8 @@ export PATH=$PATH:/usr/local/go/bin
             ;;
         "Linux")
             PROMPT='%B%F{green}%n'
-            PROMPT='$PROMPT%F{white}-%F{magenta}%m'
-            PROMPT='$PROMPT%F{white}-%F{cyan}$CPUTYPE%F{white}:%F{red}$OS%F{white}-%f%F{magenta}$SH%f%F{white}:%f%F{blue}%~%f\$%b '
+            PROMPT=$PROMPT'%F{white}-%F{magenta}%m'
+            PROMPT=$PROMPT'%F{white}-%F{cyan}$CPUTYPE%F{white}:%F{red}$OS%F{white}-%f%F{magenta}$SH%f%F{white}:%f%F{blue}%~%f\$%b '
             ;;
     esac
     RPROMPT='$(git_prompt)'

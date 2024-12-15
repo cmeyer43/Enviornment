@@ -139,12 +139,32 @@ export PATH=$PATH:/usr/local/go/bin
 
     case "$(uname)" in
         "Darwin")
-            PROMPT='%B%F{green}%n%F{white}-%F{cyan}$CPUTYPE%F{white}:%F{red}$(sw_vers -productName)-$(sw_vers -productVersion)%f%F{white}%F{white}-%f%F{magenta}$SH%f:%f%F{blue}%~%f\$%b '
+            # User Name
+            PROMPT='%B%F{green}%n'
+            # Machine Name
+            PROMPT=$PROMPT'%F{white}-%F{magenta}%m'
+            # CPU Type
+            PROMPT=$PROMPT'%F{white}-%F{cyan}$CPUTYPE'
+            # OS
+            PROMPT=$PROMPT'%F{white}:%F{red}$(sw_vers -productName)-$(sw_vers -productVersion)%f'
+            # Shell
+            PROMPT=$PROMPT'%F{white}%F{white}-%f%F{magenta}$SH%f'
+            # Directory
+            PROMPT=$PROMPT':%f%F{blue}%~%f\$%b '
             ;;
         "Linux")
+            # User Name
             PROMPT='%B%F{green}%n'
+            # Machine Name
             PROMPT=$PROMPT'%F{white}-%F{magenta}%m'
-            PROMPT=$PROMPT'%F{white}-%F{cyan}$CPUTYPE%F{white}:%F{red}$OS%F{white}-%f%F{magenta}$SH%f%F{white}:%f%F{blue}%~%f\$%b '
+            # CPU Type
+            PROMPT=$PROMPT'%F{white}-%F{cyan}$CPUTYPE'
+            # OS
+            PROMPT=$PROMPT'%F{white}:%F{red}$OS'
+            # Shell
+            PROMPT=$PROMPT'%F{white}-%f%F{magenta}$SH%f'
+            # Directory
+            PROMPT=$PROMPT'%F{white}:%f%F{blue}%~%f\$%b '
             ;;
     esac
     RPROMPT='$(git_prompt)'

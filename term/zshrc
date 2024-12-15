@@ -128,14 +128,10 @@ export PATH=$PATH:/usr/local/go/bin
     fi
 
     SH=""
-    echo ${ZSH_VERSION}
-    echo ${BASH_VERSION}
     if [ "${ZSH_VERSION}" ]; then
         SH="zsh"
-        echo "ZSH"
     elif [ "${BASH_VERSION}" ]; then
         SH="bash"
-        echo "bash"
     fi
 
     MACHINE="$(uname -m)"

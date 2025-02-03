@@ -69,6 +69,8 @@ if [ -f /etc/os-release ]; then
     else
         OS="$OS_NAME-$VER"
     fi
+elif [ sw_vers &> /dev/null ]; then
+    OS=$(sw_vers -productName)'-'$(sw_vers -productVersion)
 else
     OS="$(uname -s)"
 fi

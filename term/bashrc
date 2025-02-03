@@ -85,33 +85,35 @@ elif [ ${BASH_VERSION} ]; then
 fi
 
 color_prompt=yes
+GREEN_BOLD='\[\033[00;01;32m\]'
+GREEN='\[\033[00;32m\]'
+MAGENTA_BOLD='\[\033[00;01;35m\]'
+MAGENTA='\[\033[00;35m\]'
+RED_BOLD='\[\033[00;01;31m\]'
+RED='\[\033[00;31m\]'
+BLUE_BOLD='\[\033[00;01;34m\]'
+BLUE='\[\033[00;34m\]'
+TURQ_BOLD='\[\033[00;01;36m\]'
+TURQ='\[\033[00;36m\]'
+WHITE_BOLD='\[\033[00;01m\]'
+WHITE='\[\033[00m\]'
 if docker ps &> /dev/null; then
     # User Name
     PS1='\[\033[00;01;32m\]${debian_chroot:+($debian_chroot)}\[\033[00;01;32m\]\u'
-    # Hardware Name
-    PS1=$PS1'\[\033[0;1m\]-\[\033[01;35m\]\h'
-    # CPU Type
-    PS1=$PS1'\[\033[0;1m\]-\[\033[0;36m\]$MACHINE'
-    # OS
-    PS1=$PS1'\[\033[0;1m\]:\[\033[00;01;31m\]$OS'
-    # Shell
-    PS1=$PS1'\[\033[0;01m\]-\[\033[01;35m\]$SH'
-    # Directory
-    PS1=$PS1'\[\033[00;01m\]:\[\033[00;34m\]\w\[\033[00;01m\]\$\[\033[00m\] '
 else
     # User Name (DOCKER)
     PS1='\[\033[00;01;32m\]${debian_chroot:+($debian_chroot)}\[\033[00;01;32m\]\DOCKER'
-    # Hardware Name
-    PS1=$PS1'\[\033[0;1m\]-\[\033[01;35m\]\h'
-    # CPU Type
-    PS1=$PS1'\[\033[0;1m\]-\[\033[0;36m\]$MACHINE'
-    # OS
-    PS1=$PS1'\[\033[0;1m\]:\[\033[00;01;31m\]$OS'
-    # Shell
-    PS1=$PS1'\[\033[0;01m\]-\[\033[01;35m\]$SH'
-    # Directory
-    PS1=$PS1'\[\033[00;01m\]:\[\033[00;34m\]\w\[\033[00;01m\]\$\[\033[00m\] '
 fi
+# Hardware Name
+PS1=$PS1$WHITE_BOLD'-'$MAGENTA_BOLD'\h'
+# CPU Type
+PS1=$PS1$WHITE_BOLD'-'$TURQ_BOLD'$MACHINE'
+# OS
+PS1=$PS1$WHITE_BOLD':'$RED_BOLD'$OS'
+# Shell
+PS1=$PS1$WHITE_BOLD'-'$MAGENTA_BOLD'$SH'
+# Directory
+PS1=$PS1$WHITE_BOLD':'$BLUE'\w'$WHITE_BOLD'$'$WHITE' '
 unset color_prompt force_color_prompt
 
 # enable color support of ls and also add handy aliases

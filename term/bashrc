@@ -55,10 +55,107 @@ if [ -n "$force_color_prompt" ]; then
     fi
 fi
 
-#OS=$(cat /etc/os-release | grep ^NAME | tr -d 'NAME="')
-#VERSION=$(cat /etc/os-release | grep ^VERSION= | tr -d 'VERSION="')
-#OS=${OS// /-}
-#VERSION=${VERSION// /-}
+GREEN_BOLD="\033[00;01;32m"
+GREEN="\033[00;32m"
+MAGENTA_BOLD="\033[00;01;35m"
+MAGENTA="\033[00;35m"
+RED_BOLD="\033[00;01;31m"
+RED="\033[00;31m"
+BLUE_BOLD="\033[00;01;34m"
+BLUE="\033[00;34m"
+CYAN_BOLD="\033[00;01;36m"
+CYAN="\033[00;36m"
+WHITE_BOLD="\033[00;01m"
+WHITE="\033[00m"
+
+### Git [±master ▾●]
+GIT_PROMPT_PREFIX="[${GREEN}±${WHITE}"
+GIT_PROMPT_SUFFIX="${WHITE}]"
+GIT_PROMPT_CLEAN="${GREEN}✓${WHITE}"
+GIT_PROMPT_AHEAD="${CYAN}▴${WHITE}"
+GIT_PROMPT_BEHIND="${MAGENTA}▾${WHITE}"
+GIT_PROMPT_STAGED="${GREEN}●${WHITE}"
+GIT_PROMPT_UNSTAGED="yellow●${WHITE}"
+GIT_PROMPT_UNTRACKED="${RED}●${WHTIE}"
+GIT_PROMPT_STASHED="${WHITE}(${BLUE}✹${WHITE})"
+
+git_info ()
+{
+    local ref
+    ref=$(git symbolic-ref HEAD 2> /dev/null) || \
+    ref=$(git rev-parse --short HEAD 2> /dev/null) || return
+    echo "${ref#refs/heads/}"
+}
+
+git_status()
+{
+    local result gitstatus
+    gitstatus="$(command git status --porcelain -b 2>/dev/null)"
+
+    # check status of files
+    gitfiles="$(tail -n +2 <<< "$gitstatus")"
+    if [[ -n "$gitfiles" ]]; then
+        if [[ "$gitfiles" =~ (^|\n)[AMRD].  ]]; then
+            result+="$GIT_PROMPT_STAGED"
+        fi
+        if [[ "$gitfiles" =~ (^|\n).[MTD]  ]]; then
+            result+="$GIT_PROMPT_UNSTAGED"
+        fi
+        if [[ "$gitfiles" =~ (^|\n)\\?\\?  ]]; then
+            result+="$GIT_PROMPT_UNTRACKED"
+        fi
+        if [[ "$gitfiles" =~ (^|\n)UU  ]]; then
+            result+="$GIT_PROMPT_UNMERGED"
+        fi
+    else
+        result+="$GIT_PROMPT_CLEAN"
+    fi
+
+    # check status of local repository
+    local gitbranch="$(head -n 1 <<< "$gitstatus")"
+    if [[ "$gitbranch" =~ '^## .*ahead' ]]; then
+        result+="$GIT_PROMPT_AHEAD"
+    fi
+    if [[ "$gitbranch" =~ '^## .*behind' ]]; then
+        result+="$GIT_PROMPT_BEHIND"
+    fi
+    if [[ "$gitbranch" =~ '^## .*diverged' ]]; then
+        result+="$GIT_PROMPT_DIVERGED"
+    fi
+
+    # check if there are stashed changes
+    if command git rev-parse --verify refs/stash &> /dev/null; then
+        result+="$GIT_PROMPT_STASHED"
+    fi
+
+    echo -e $result
+}
+
+
+git_prompt()
+{
+    # ignore non git folders and hidden repos (adapted from lib/git.zsh)
+    if ! command git rev-parse --git-dir &> /dev/null \
+        || [[ "$(command git config --get oh-my-zsh.hide-info 2>/dev/null)" == 1 ]]; then
+        return
+    fi
+    # check git information
+    local gitinfo=$(git_info)
+    if [[ -z "$gitinfo" ]]; then
+        return
+    fi
+
+    # quote % in git information
+    local output="${gitinfo//%/%%}"
+
+    # check git status
+    local gitstatus=$(git_status)
+    if [[ -n "$gitstatus" ]]; then
+        output+=" $gitstatus"
+    fi
+
+    echo -e "${GIT_PROMPT_PREFIX}${output}${GIT_PROMPT_SUFFIX}"
+}
 
 if [ -f /etc/os-release ]; then
     . /etc/os-release
@@ -85,35 +182,28 @@ elif [ ${BASH_VERSION} ]; then
 fi
 
 color_prompt=yes
-GREEN_BOLD='\[\033[00;01;32m\]'
-GREEN='\[\033[00;32m\]'
-MAGENTA_BOLD='\[\033[00;01;35m\]'
-MAGENTA='\[\033[00;35m\]'
-RED_BOLD='\[\033[00;01;31m\]'
-RED='\[\033[00;31m\]'
-BLUE_BOLD='\[\033[00;01;34m\]'
-BLUE='\[\033[00;34m\]'
-TURQ_BOLD='\[\033[00;01;36m\]'
-TURQ='\[\033[00;36m\]'
-WHITE_BOLD='\[\033[00;01m\]'
-WHITE='\[\033[00m\]'
-if docker ps &> /dev/null; then
+#if docker ps &> /dev/null; then
     # User Name
-    PS1='\[\033[00;01;32m\]${debian_chroot:+($debian_chroot)}\[\033[00;01;32m\]\u'
-else
-    # User Name (DOCKER)
-    PS1='\[\033[00;01;32m\]${debian_chroot:+($debian_chroot)}\[\033[00;01;32m\]\DOCKER'
-fi
+    PS1="\[${GREEN_BOLD}\]${debian_chroot:+($debian_chroot)}\[${GREEN_BOLD}\]\u"
+#else
+#    # User Name (DOCKER)
+#    PS1='\[\033[00;01;32m\]${debian_chroot:+($debian_chroot)}\[\033[00;01;32m\]\DOCKER'
+#fi
 # Hardware Name
-PS1=$PS1$WHITE_BOLD'-'$MAGENTA_BOLD'\h'
+#PS1=$PS1"\[${WHITE_BOLD}\]-\[${MAGENTA_BOLD}\]\h"
 # CPU Type
-PS1=$PS1$WHITE_BOLD'-'$TURQ_BOLD'$MACHINE'
+PS1=$PS1"\[${WHITE_BOLD}\]-\[${CYAN_BOLD}\]$MACHINE"
 # OS
-PS1=$PS1$WHITE_BOLD':'$RED_BOLD'$OS'
+PS1=$PS1"\[${WHITE_BOLD}\]:\[${RED_BOLD}\]$OS"
 # Shell
-PS1=$PS1$WHITE_BOLD'-'$MAGENTA_BOLD'$SH'
+PS1=$PS1"\[${WHITE_BOLD}\]-\[${MAGENTA_BOLD}\]$SH"
 # Directory
-PS1=$PS1$WHITE_BOLD':'$BLUE'\w'$WHITE_BOLD'$'$WHITE' '
+PS1=$PS1"\[${WHITE_BOLD}\]:\[${BLUE}\]\w\[${WHITE_BOLD}\]\$\[${WHITE}\] "
+
+HI="heyhey"
+BUF=40
+#PS1='\[$(printf "%$(($COLUMNS - ${#HI} + $BUF))s\r" "${HI}\r")\]'$PS1
+#PS1='\[$(printf "%$(($COLUMNS + $BUF))s\r" "$(git_prompt)")\]'$PS1
 unset color_prompt force_color_prompt
 
 # enable color support of ls and also add handy aliases

@@ -6,7 +6,6 @@ import os
 import glob
 import subprocess
 import timeit
-
 for f in glob.glob(os.path.dirname(__file__)+"/*.py"):
     if os.path.isfile(f) and not os.path.basename(f).startswith('_') and os.path.basename(f) != "testController.py":
         import_str = "from {0} import *".format(os.path.basename(f)[:-3])
@@ -79,7 +78,6 @@ def runFunctions(clazz):
 
 def runTests(myModule):
     clazzs = getClasses(myModule)
-    print(clazzs)
     numTests = getNumTests(clazzs)
     failed = list()
     print("\033[32m[==========]\033[37m ", end='')

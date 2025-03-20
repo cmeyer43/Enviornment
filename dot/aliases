@@ -1,0 +1,21 @@
+alias reset="reset && printf '\e[3J'"
+alias bdf="df -k"
+# Setup script will detect if gitk or gitx is installed and change this to gitx if needed.
+# This is done by replacing all `gitk` with `gitx` so if you for some reason have a `gitk`
+# string that should not change it will be broken.
+alias gk="gitk"
+alias gka="gitk --all"
+alias gs="git status"
+alias gba="git branch --all"
+alias gcm="git commit -m"
+alias gch="git checkout"
+alias gl="git log"
+alias h="fc -l"
+
+# no longer use fprime so removing
+# alias fp='fprime-util'
+# alias fpp='yes | fprime-util purge'
+# alias fpg='fprime-util generate'
+# alias fpb='fprime-util build'
+# alias fpr='yes | fprime-util purge && fprime-util generate && fprime-util build'
+ 

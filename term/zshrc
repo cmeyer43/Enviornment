@@ -1,3 +1,5 @@
+export OPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl@3
+
 # Make zsh autocomplete with up arrow
 # autoload -Uz history-search-end
 # zle -N history-beginning-search-backward-end history-search-end
@@ -20,150 +22,62 @@ export GREP_COLOR='1;35;40'
 export PATH=$PATH:/usr/local/go/bin
 
 # PS1 Setup
-
-    ### Git [±master ▾●]
-    GIT_PROMPT_PREFIX="[%F{green}±%F{white}"
-    GIT_PROMPT_SUFFIX="%F{white}]"
-    GIT_PROMPT_CLEAN="%F{green}✓%F{white}"
-    GIT_PROMPT_AHEAD="%F{cyan}▴%F{whtie}"
-    GIT_PROMPT_BEHIND="%F{magenta}▾%F{white}"
-    GIT_PROMPT_STAGED="%F{green}●%F{white}"
-    GIT_PROMPT_UNSTAGED="%F{yellow}●%F{white}"
-    GIT_PROMPT_UNTRACKED="%F{red}●%F{white}"
-    GIT_PROMPT_STASHED="(%F{blue}✹%F{white})"
-
-    git_info ()
-    {
-        local ref
-        ref=$(command git symbolic-ref HEAD 2> /dev/null) || \
-        ref=$(command git rev-parse --short HEAD 2> /dev/null) || return
-        echo "${ref#refs/heads/}"
-    }
-
-    git_status()
-    {
-        local result gitstatus
-        gitstatus="$(command git status --porcelain -b 2>/dev/null)"
-
-        # check status of files
-        local gitfiles="$(tail -n +2 <<< "$gitstatus")"
-        if [[ -n "$gitfiles" ]]; then
-            if [[ "$gitfiles" =~ $'(^|\n)[AMRD]. ' ]]; then
-                result+="$GIT_PROMPT_STAGED"
-            fi
-            if [[ "$gitfiles" =~ $'(^|\n).[MTD] ' ]]; then
-                result+="$GIT_PROMPT_UNSTAGED"
-            fi
-            if [[ "$gitfiles" =~ $'(^|\n)\\?\\? ' ]]; then
-                result+="$GIT_PROMPT_UNTRACKED"
-            fi
-            if [[ "$gitfiles" =~ $'(^|\n)UU ' ]]; then
-                result+="$GIT_PROMPT_UNMERGED"
-            fi
-        else
-            result+="$GIT_PROMPT_CLEAN"
-        fi
-
-        # check status of local repository
-        local gitbranch="$(head -n 1 <<< "$gitstatus")"
-        if [[ "$gitbranch" =~ '^## .*ahead' ]]; then
-            result+="$GIT_PROMPT_AHEAD"
-        fi
-        if [[ "$gitbranch" =~ '^## .*behind' ]]; then
-            result+="$GIT_PROMPT_BEHIND"
-        fi
-        if [[ "$gitbranch" =~ '^## .*diverged' ]]; then
-            result+="$GIT_PROMPT_DIVERGED"
-        fi
-
-        # check if there are stashed changes
-        if command git rev-parse --verify refs/stash &> /dev/null; then
-            result+="$GIT_PROMPT_STASHED"
-        fi
-
-        echo $result
-    }
-
-
-    git_prompt()
-    {
-        # ignore non git folders and hidden repos (adapted from lib/git.zsh)
-        if ! command git rev-parse --git-dir &> /dev/null \
-            || [[ "$(command git config --get oh-my-zsh.hide-info 2>/dev/null)" == 1 ]]; then
-            return
-        fi
-        # check git information
-        local gitinfo=$(git_info)
-        if [[ -z "$gitinfo" ]]; then
-            return
-        fi
-
-        # quote % in git information
-        local output="${gitinfo:gs/%/%%}"
-
-        # check git status
-        local gitstatus=$(git_status)
-        if [[ -n "$gitstatus" ]]; then
-            output+=" $gitstatus"
-        fi
-
-        echo "${GIT_PROMPT_PREFIX}${output}${GIT_PROMPT_SUFFIX}"
-    }
-
-    if [ -f /etc/os-release ]; then
-        . /etc/os-release
-        OS_NAME=${NAME// /-}
-        VER=${VERSION_ID// /-}
-        if [ -z ${VER} ]; then
-            OS=$OS_NAME
-        else
-            OS="$OS_NAME-$VER"
-        fi
+source ~/.git_prompt
+if [ -f /etc/os-release ]; then
+    . /etc/os-release
+    OS_NAME=${NAME// /-}
+    VER=${VERSION_ID// /-}
+    if [ -z ${VER} ]; then
+        OS=$OS_NAME
     else
-        OS="$(uname -s)"
+        OS="$OS_NAME-$VER"
     fi
+else
+    OS="$(uname -s)"
+fi
 
-    SH=""
-    if [ "${ZSH_VERSION}" ]; then
-        SH="zsh"
-    elif [ "${BASH_VERSION}" ]; then
-        SH="bash"
-    fi
+SH=""
+if [ "${ZSH_VERSION}" ]; then
+    SH="zsh"
+elif [ "${BASH_VERSION}" ]; then
+    SH="bash"
+fi
 
-    MACHINE="$(uname -m)"
-    setopt PROMPT_SUBST
+MACHINE="$(uname -m)"
+setopt PROMPT_SUBST
 
-    case "$(uname)" in
-        "Darwin")
-            # User Name
-            PROMPT='%B%F{green}%n'
-            # Machine Name
-            PROMPT=$PROMPT'%F{white}-%F{magenta}%m'
-            # CPU Type
-            PROMPT=$PROMPT'%F{white}-%F{cyan}$CPUTYPE'
-            # OS
-            PROMPT=$PROMPT'%F{white}:%F{red}$(sw_vers -productName)-$(sw_vers -productVersion)%f'
-            # Shell
-            PROMPT=$PROMPT'%F{white}%F{white}-%f%F{magenta}$SH%f'
-            # Directory
-            PROMPT=$PROMPT':%f%F{blue}%~%f\$%b%f%F{white}%f '
-            ;;
-        "Linux")
-            # User Name
-            PROMPT='%B%F{green}%n'
-            # Machine Name
-            PROMPT=$PROMPT'%F{white}-%F{magenta}%m'
-            # CPU Type
-            PROMPT=$PROMPT'%F{white}-%F{cyan}$CPUTYPE'
-            # OS
-            PROMPT=$PROMPT'%F{white}:%F{red}$OS'
-            # Shell
-            PROMPT=$PROMPT'%F{white}-%f%F{magenta}$SH%f'
-            # Directory
-            PROMPT=$PROMPT'%F{white}:%f%F{blue}%~%f\$%b '
-            ;;
-    esac
-    RPROMPT='$(git_prompt)%F{white}'
+case "$(uname)" in
+    "Darwin")
+        # User Name
+        PROMPT='%B%F{green}%n'
+        # Machine Name
+        PROMPT=$PROMPT'%F{white}-%F{magenta}%m'
+        # CPU Type
+        PROMPT=$PROMPT'%F{white}-%F{cyan}$CPUTYPE'
+        # OS
+        PROMPT=$PROMPT'%F{white}:%F{red}$(sw_vers -productName)-$(sw_vers -productVersion)%f'
+        # Shell
+        PROMPT=$PROMPT'%F{white}%F{white}-%f%F{magenta}$SH%f'
+        # Directory
+        PROMPT=$PROMPT':%f%F{blue}%~%f\$%b%f%F{white}%f '
+        ;;
+    "Linux")
+        # User Name
+        PROMPT='%B%F{green}%n'
+        # Machine Name
+        PROMPT=$PROMPT'%F{white}-%F{magenta}%m'
+        # CPU Type
+        PROMPT=$PROMPT'%F{white}-%F{cyan}$CPUTYPE'
+        # OS
+        PROMPT=$PROMPT'%F{white}:%F{red}$OS'
+        # Shell
+        PROMPT=$PROMPT'%F{white}-%f%F{magenta}$SH%f'
+        # Directory
+        PROMPT=$PROMPT'%F{white}:%f%F{blue}%~%f\$%b '
+        ;;
+esac
+RPROMPT='$(git_prompt)%F{white}'
+# PS1 setup
 
 # enable color support of ls and also add handy aliases
 
@@ -212,32 +126,8 @@ export LSCOLORS="ExGxCxdxCxegedabagacadah"
 alias ll='ls -lFh'
 alias la='ls -Al'
 alias l='ls -CF'
-alias reset="reset && printf '\e[3J'"
-alias bdf="df -k"
-alias gk="gitx --all"
-alias gs="git status"
-alias gba="git branch --all"
-alias gcm="git commit -m"
-alias gch="git checkout"
-alias gl="git log"
 
 export PATH=~/.local/bin:$PATH
-
-alias fp='fprime-util'
-alias fpp='yes | fprime-util purge'
-alias fpg='fprime-util generate'
-alias fpb='fprime-util build'
-alias fpr='yes | fprime-util purge && fprime-util generate && fprime-util build'
- 
-# Add an "alert" alias for long running commands.  Use like so:
-#   sleep 10; alert
-alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
-
-export PATH=~/.local/bin:$PATH
-
-# Add an "alert" alias for long running commands.  Use like so:
-#   sleep 10; alert
-alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
 
 # Alias definitions.
 # You may want to put all your additions into a separate file like

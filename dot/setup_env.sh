@@ -42,40 +42,45 @@ cat git_prompt > ~/.git_prompt
 name="$(uname -s)"
 case "${name}" in
     Linux*)
-        if apt list &> /dev/null; then
-            # Update apt manager.
-            sudo apt-get update
-            # Install system packages
-            sudo apt-get install -y tmux vim xclip build-essential gitk git docker.io ncdu
 
-            # allows vimrc to be used when super user
-            sudo touch /etc/vim/vimrc.local
-            sudo cat vimrc > /etc/vim/vimrc.local
+        if [ "$EUID" -ne 0 ]; then
+            echo "Cannot install any packages without sudo. Only copying dot files"
+        else
+            if apt list &> /dev/null; then
+                # Update apt manager.
+                sudo apt-get update
+                # Install system packages
+                sudo apt-get install -y tmux vim xclip build-essential gitk git docker.io ncdu
 
-        elif dnf &> /dev/null; then
-            # Install system packages
-            sudo dnf install -y tmux vim xclip gitk git ncdu dnf-plugins-core
-            # Add docker repo.
-            sudo dnf-3 -y config-manager --add-repo https://download.docker.com/linux/fedora/docker-ce.repo
-            # Install docker packages
-            sudo dnf install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+                # allows vimrc to be used when super user
+                sudo touch /etc/vim/vimrc.local
+                sudo cat vimrc > /etc/vim/vimrc.local
 
-            # allows vimrc to be used when super user
-            sudo touch /etc/vimrc
-            sudo cp vimrc /etc/vimrc
+            elif dnf &> /dev/null; then
+                # Install system packages
+                sudo dnf install -y tmux vim xclip gitk git ncdu dnf-plugins-core
+                # Add docker repo.
+                sudo dnf-3 -y config-manager --add-repo https://download.docker.com/linux/fedora/docker-ce.repo
+                # Install docker packages
+                sudo dnf install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+                # allows vimrc to be used when super user
+                sudo touch /etc/vimrc
+                sudo cp vimrc /etc/vimrc
+            fi
+
+            # TODO add yum and pacman
+
+            # Setup docker socket and env
+            sudo systemctl start docker.socket
+            source ~/.bashrc
+            sudo groupadd docker
+            sudo usermod -aG docker $USER
+            newgrp
+            newgrp docker
+            chmod 777 /var/run/docker.sock
+            sudo systemctl start docker.socket
         fi
-
-        # TODO add yum and pacman
-
-        # Setup docker socket and env
-        sudo systemctl start docker.socket
-        source ~/.bashrc
-        sudo groupadd docker
-        sudo usermod -aG docker $USER
-        newgrp
-        newgrp docker
-        chmod 777 /var/run/docker.sock
-        sudo systemctl start docker.socket
 
         echo "Linux Setup";;
 

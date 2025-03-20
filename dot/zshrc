@@ -123,6 +123,7 @@ set -o monitor
 #
 export LSCOLORS="ExGxCxdxCxegedabagacadah"
 
+alias ls='ls -G'
 alias ll='ls -lFh'
 alias la='ls -Al'
 alias l='ls -CF'

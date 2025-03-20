@@ -1,40 +1,32 @@
 # Save existing settings and copy over mine.
-if [ -f ~/.zshrc ]
+if [ -f ~/.zshrc ]; then
     cp ~/.zshrc ~/.zshrc.old
 fi
 cat zshrc > ~/.zshrc
 
-if [ -f ~/.bashrc ]
+if [ -f ~/.bashrc ]; then
     cp ~/.bashrc ~/.bashrc.old
 fi
 cat bashrc > ~/.bashrc
 
-if [ -f ~/.vimrc ]
+if [ -f ~/.vimrc ]; then
     cp ~/.vimrc ~/.vimrc.old
 fi
 # The non-user (etc) version of this will get written later b/c its location changes based on package manager.
 cat vimrc > ~/.vimrc
 
-if [ -f ~/.tmux.conf ]
+if [ -f ~/.tmux.conf ]; then
     cp ~/.tmux.conf ~/.tmux.conf.old
 fi
-# Write in the correct default shell to tmux config. Also gonna source new .*rc file cause I've already detected the shell.
-if [ ${ZSH_VERSION} ]; then
-    source ~/.zshrc
-    echo 'set-option -g default-shell "/bin/zsh"' > ~/.tmux.conf
-elif [ ${BASH_VERSION} ]; then
-    source ~/.bashrc
-    echo 'set-option -g default-shell "/bin/bash"' > ~/.tmux.conf
-fi
-cat tmux.conf >> ~/.tmux.conf
+# This is written once I know the OS because I'll only use zsh on mac.
 
-if [ -f ~/.aliases ]
+if [ -f ~/.aliases ]; then
     cp ~/.aliases ~/.aliases.old
 fi
 cat aliases > ~/.aliases
 
 # Kinda uneccesary cause this is not a custom file.
-if [ -f ~/.git_prompt ]
+if [ -f ~/.git_prompt ]; then
     cp ~/.git_prompt ~/.git_prompt.old
 fi
 cat git_prompt > ~/.git_prompt
@@ -43,7 +35,9 @@ name="$(uname -s)"
 case "${name}" in
     Linux*)
 
-        if [ "$EUID" -ne 0 ]; then
+        echo "$(echo 'set-option -g default-shell "/bin/bash"')\n$(cat tmux.conf)" > ~/.tmux.conf
+
+        if [ "${EUID:-$(id -u)}" -ne 0 ]; then
             echo "Cannot install any packages without sudo. Only copying dot files"
         else
             if apt list &> /dev/null; then
@@ -85,6 +79,7 @@ case "${name}" in
         echo "Linux Setup";;
 
     Darwin*)
+        echo "$(echo 'set-option -g default-shell "/bin/zsh"')\n$(cat tmux.conf)" > ~/.tmux.conf
         # Install xcode for basic packages
         xcode-select --install
         # Brew install
@@ -94,9 +89,9 @@ case "${name}" in
         # Install packages
         brew install tmux vim xclip git gitx docker ncdu -q
 
-        # Docker just works on mac no need to configure anything to use it.
+        ## Docker just works on mac no need to configure anything to use it.
 
-        # On Mac I use gitx not gitk so fix that in aliases real quick.
+        ## On Mac I use gitx not gitk so fix that in aliases real quick.
         perl -pi -e 's/gitk/gitx/g' ~/.aliases
 
         echo "Mac Setup";;

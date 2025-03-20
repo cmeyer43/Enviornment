@@ -91,7 +91,7 @@ PS1=$PS1"\[${WHITE_BOLD}\]:\[${RED_BOLD}\]$OS\[${WHITE}\]"
 # Shell
 PS1=$PS1"\[${WHITE_BOLD}\]-\[${MAGENTA_BOLD}\]$SH\[${WHITE}\]"
 # Directory
-PS1=$PS1"\[${WHITE_BOLD}\]:\[${BLUE_BOLD}\]\w\[${WHITE_BOLD}\]\$\[${WHITE}\] "
+PS1=$PS1"\[${WHITE_BOLD}\]:\[${BLUE_BOLD}\]\w\[${WHITE}\]"
 # Trail symbol
 PS1=$PS1"\[${WHITE_BOLD}\]\$\[${WHITE}\] "
 # Add git_prompt here once I can figure out how to use it.

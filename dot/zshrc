@@ -23,6 +23,7 @@ export PATH=$PATH:/usr/local/go/bin
 
 # PS1 Setup
 source ~/.git_prompt
+
 if [ -f /etc/os-release ]; then
     . /etc/os-release
     OS_NAME=${NAME// /-}
@@ -44,12 +45,20 @@ elif [ "${BASH_VERSION}" ]; then
 fi
 
 MACHINE="$(uname -m)"
+
+docker_prompt=no
+
 setopt PROMPT_SUBST
 
 case "$(uname)" in
     "Darwin")
-        # User Name
-        PROMPT='%B%F{green}%n'
+        if [ "$(docker ps) > /dev/null" ] || [ $docker_prompt=="no" ]; then
+            # User Name
+            PROMPT='%B%F{green}%n'
+        else
+            # User Name
+            PROMPT='%B%F{green}DOCKER'
+        fi
         # Machine Name
         PROMPT=$PROMPT'%F{white}-%F{magenta}%m'
         # CPU Type
@@ -62,8 +71,13 @@ case "$(uname)" in
         PROMPT=$PROMPT':%f%F{blue}%~%f\$%b%f%F{white}%f '
         ;;
     "Linux")
-        # User Name
-        PROMPT='%B%F{green}%n'
+        if [ "$(docker ps) > /dev/null" ] || [ $docker_prompt=="no" ]; then
+            # User Name
+            PROMPT='%B%F{green}%n'
+        else
+            # User Name
+            PROMPT='%B%F{green}DOCKER'
+        fi
         # Machine Name
         PROMPT=$PROMPT'%F{white}-%F{magenta}%m'
         # CPU Type

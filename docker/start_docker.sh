@@ -1,5 +1,12 @@
 #!/bin/bash
 
+mountHome="-v $HOME:$HOME"
+
+if [ "${EUID:-$(id -u)}" -eq 0 ]; then
+    echo "Will not mount root directory"
+    mountHome=""
+fi
+
 mappings=""
 
 cmd="/bin/bash"
@@ -25,7 +32,7 @@ dockerid=$( awk -F: '$1=="docker" { print $3 }' /etc/group )
 exec docker run --rm -it \
      $seccomp_stupid \
      --name $container --tmpfs=/tmp \
-     -v $HOME:$HOME $mappings \
+     $mountHome $mappings \
      -v /tmp/.X11-unix:/tmp/.X11-unix \
      --hostname=$(hostname) --env DISPLAY=$DISPLAY \
      $tag /_setup_user_shell.sh \

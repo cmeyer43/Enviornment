@@ -8,7 +8,7 @@ name=${1//:/-}
 
 container=${UER}-${name}
 
-if [[ "$1" = "root" ]] ; then
+if [[ "$2" = "root" ]] ; then
 
     userid=0
     groupid=0

@@ -1,13 +1,13 @@
 
-// Compiling this file is tricky, becuase the host machine
-// wher the docker is built is no-good for building this. it has
-// to run in the docker enviornmnet, which has different libc and
-// probably different vdso and libgcc and ld.so sand the binary
+// NOTE compiling this file is tricky, because the host machine
+// where the docker is built is no-good for building this. it has
+// to run in the docker environment, which has different libc and
+// probably different vdso and libgcc and ld.so and the binary
 // compiled on the host may not even work inside the docker.
-// so to build this we do
-//      docker run fedora:38
-//      dnf install g++
-//      g++ su_reaper.cc -o su_reaper
+// so to build this we do:
+//     docker run fedora:38
+//     dnf install g++
+//     g++ su_reaper.cc -o su_reaper
 // and the resulting binary is what gets installed in the final
 // docker image. kind of gross, but you gotta do what you gotta do.
 
@@ -23,7 +23,6 @@
 #include <inttypes.h>
 #include <sys/wait.h>
 #include <grp.h>
-#include <vector>
 
 static pid_t our_bash_pid = -1;
 static bool run = true;
@@ -33,49 +32,42 @@ sighand(int s)
 {
     pid_t pid = -1;
     int status;
-    if(s == SIGCHLD)
-    {
-        do
-        {
+    if (s == SIGCHLD)
+        do {
             pid = waitpid(/*wait for any child*/-1, &status, WNOHANG);
             if (pid > 0)
             {
                 if (pid == our_bash_pid)
                 {
                     printf("su_reaper: detected death of our bash child "
-                            "pid %d with status %d\n",
-                            (uint32_t) pid, status);
+                           "pid %u  with status %d\n",
+                           (uint32_t) pid, status);
 
+                    // we're done
                     run = false;
                 }
                 else
                 {
                     printf("su_reaper: detected death of orphaned child "
-                            "pid %u with status %d\n",
-                            (uint32_t) pid, status);
+                           "pid %u  with status %d\n",
+                           (uint32_t) pid, status);
                 }
             }
         } while (pid > 0);
-    }
 }
 
 int main(int argc, char ** argv)
 {
-    if (argc < 4)
+    if (argc != 5)
     {
-        fprintf(stderr, "usage: su_reaper uid gid cmd\n");
+        fprintf(stderr, "usage: su_reaper  uid gid docker_gid cmd\n");
         exit(1);
     }
 
     int uid = atoi(argv[1]);
     int gid = atoi(argv[2]);
-    std::vector<const char*> command;
-
-    for (int ind = 3; ind < argc; ind++)
-    {
-        command.push_back(argv[ind]);
-    }
-    command.push_back(NULL);
+    int docker_gid = atoi(argv[3]);
+    const char *cmd = argv[4];
 
     struct sigaction sa;
     sa.sa_handler = &sighand;
@@ -85,83 +77,58 @@ int main(int argc, char ** argv)
     sigaction(SIGCHLD, &sa, NULL);
 
     // set ourselves as a reaper so we get all
-    // the zombiews and we can reap them and clean up.
-    // otherwise zombies take over the world
+    // the zombies and we can reap them and clean up.
+    // otherwise zombies take over the world.
     if (prctl(PR_SET_CHILD_SUBREAPER, 1) < 0)
     {
         int e = errno;
-        printf("prctl SUBREAPER :%d (%s)\n",
-                e, strerror(e));
+        printf("prctl SUBREAPER : %d (%s)\n",
+               e, strerror(e));
+        // otherwise ignore
     }
 
     int exec_error_pipe[2];
-    if (pipe(exec_error_pipe) < 0)
-    {
-        int e = errno;
-        printf("error: pipe: %d (%s)\n", 
-                e, strerror(e));
-    }
+    pipe(exec_error_pipe);
 
-    // use vfork because all we're goint 
-    // to do is exec a child
+    // use vfork because all we're going
+    // to do is exec a child.
     pid_t pid = vfork();
     our_bash_pid = pid;
 
     if (pid == 0)
     {
-        gid_t mygid;
+        // child
 
-        //child
-
-        //child does not need read end of this pipe.
+        // child does not need read end of this pipe.
         close(exec_error_pipe[0]);
 
         // child will close write-end if exec succeeds.
         fcntl(exec_error_pipe[1], F_SETFD, FD_CLOEXEC);
 
-#if 0
-        // set my process credential
-        if (docker_gid != 0)
+        // set my process credentials!
+        gid_t  mygid;
+        if (docker_gid > 0)
         {
             mygid = (gid_t) docker_gid;
             setgroups(1, &mygid);
         }
-        else
-#endif
-        {
-            setgroups(0, NULL);
-        }
         mygid = (gid_t) gid;
-        if (setgid(mygid) < 0)
-        {
-            int e = errno;
-            printf("error: setgid: %d (%s)\n",
-                    e, strerror(e));
-        }
+        setgid(mygid);
+        uid_t  myuid = (uid_t) uid;
+        setuid(myuid);
 
-        uid_t myuid = (uid_t) uid;
-        if (setuid(myuid) < 0)
-        {
-            int e = errno;
-            printf("error: setgid: %d (%s)\n",
-                    e, strerror(e));
-            return 1;
-        }
-
-        execvp(command[0], (char *const*)command.data());
+        // run the shell.
+        (void) execl(cmd, cmd, NULL);
 
         // if exec is successful, pipe[1] is CLOEXEC'd
-        // and we don't get here. if exec is failed,we
+        // and we don't get here. if exec is failed, we
         // get here and send errno back to parent.
         int e = errno;
-        if (write(exec_error_pipe[1], &e, sizeof(e)) != sizeof(e))
-        {
-            // do nothing
-        }
+        (void) write(exec_error_pipe[1], &e, sizeof(e));
 
         // call _exit, not exit, because we don't want
-        // to call registred atexit() handlers in a vfork'd
-        // child
+        // to call registered atexit() handlers in a vfork'd
+        // child.
         _exit(99);
     }
     // else parent
@@ -170,12 +137,12 @@ int main(int argc, char ** argv)
     close(exec_error_pipe[1]);
     int e;
     int cc = read(exec_error_pipe[0], &e, sizeof(e));
-    // parent no longer needs read-end
+    // parent no longer needs read-end.
     close(exec_error_pipe[0]);
 
     // if cc == 0, the child's exec succeeded.
-    // if cc == sizeof(int) then teh exec failed and we
-    // are gettin an errno.
+    // if cc == sizeof(int) then the exec failed and we
+    // are getting an errno.
     if (cc == sizeof(e))
     {
         fprintf(stderr, "EXEC FAILED: %d (%s)\n",
@@ -183,23 +150,23 @@ int main(int argc, char ** argv)
         return 1;
     }
 
-    // No longer anything to do but sit here catching
-    // SIGCHLDS and reaping zombies.
+    // no longer anything to do but sit here catching
+    // SIGCHLDs and reaping zombies.
     while (run)
     {
         // NOTE 10 seconds sounds like a long time
         // to detect our intended child is dead, but actually
-        // the SIGCHLD interrupts this sleep andwe detect
-        // the run==false instatntly.
+        // the SIGCHLD interrupts this sleep and we detect
+        // the run==false instantly.
         sleep(10);
     }
 
     // we don't have to go collect any more orphans, because we're
     // about to exit, giving up our subreaper status, which reparents
-    // all our lost orphans up to init(1)
+    // all our lost orphans up to init(1).
 
     // we also don't worry about running children, because this program
-    // is intended to be run inside docker, and this exits whne docker
+    // is intended to be run inside docker, and this exits when docker
     // exits, and docker will clean all that crap up.
 
     return 0;

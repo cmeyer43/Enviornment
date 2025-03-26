@@ -21,6 +21,9 @@ locale-gen en_US
 locale-gen en_US.UTF-8
 update-locale
 
+# Set root password to `root` so you can install acces su from user to install packages.
+yes root | passwd
+
 # Build and do whatever you want to the image
 
 cd /tmp

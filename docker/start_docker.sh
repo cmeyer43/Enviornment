@@ -1,40 +1,32 @@
 #!/bin/bash
 
-USER=$( id -un )
-USERID=$( id -u )
-GROUPID=$( id -g )
+mappings=""
 
-# tag= ..
+cmd="/bin/bash"
 
 name=${1//:/-}
+
 container=${USER}-${name}
 
 tag=$1
 
-# mappings="-v /gitlocal:/gitlocal"
+# this is only really needed on fedora 33 docker 19.
+# why?  "clone3" --> not supported, oops
+seccomp_stupid="--security-opt seccomp=unconfined"
 
-set -x
+USER=$( id -un )
 
-if [ "${EUID:-$(id -u)}" -ne 0 ]; then
-    exec docker run --rm -it \
-        --privileged \
-        --net host \
-        -v $HOME:$HOME \
-        --security-opt seccomp=unconfined \
-        --hostname=$(hostname) --env DISPLAY=$DISPLAY \
-        -v /tmp/.X11-unix:/tmp/.X11-unix \
-        --name $container \
-        $tag /_setup_user_shell.sh start \
-            "$PWD" "$USER" "$HOME" $USERID $GROUPID
+userid=$( id -u )
+groupid=$( id -g )
+dockerid=$( awk -F: '$1=="docker" { print $3 }' /etc/group )
 
-else # do not mount home onto root that is bad.
-    exec docker run --rm -it \
-        --privileged \
-        --net host \
-        --security-opt seccomp=unconfined \
-        --hostname=$(hostname) --env DISPLAY=$DISPLAY \
-        -v /tmp/.X11-unix:/tmp/.X11-unix \
-        --name $container \
-        $tag /_setup_user_shell.sh start \
-            "$PWD" "$USER" "$HOME" $USERID $GROUPID
-fi
+[[ -z $dockerid ]] && dockerid=NONE
+
+exec docker run --rm -it \
+     $seccomp_stupid \
+     --name $container --tmpfs=/tmp \
+     -v $HOME:$HOME $mappings \
+     -v /tmp/.X11-unix:/tmp/.X11-unix \
+     --hostname=$(hostname) --env DISPLAY=$DISPLAY \
+     $tag /_setup_user_shell.sh \
+     start "$USER" "$HOME" "$userid" "$groupid" "$dockerid" "$PWD" "$cmd"
